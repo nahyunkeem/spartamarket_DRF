@@ -1,8 +1,8 @@
 from django.db import models
-from accounts.models import Account
+from accounts.models import User
 
 class Product(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=120)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
