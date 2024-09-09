@@ -1,13 +1,26 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import (
+    api_view, permission_classes
+    )
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from .models import User
-from .serializers import SignupSerializer, ProfileSerializer
+from django.contrib.auth import password_validation
+from .models import User  
+from .serializers import (
+    SignupSerializer, ProfileSerializer, UserChangeSerializer, PasswordChangeSerializer
+)
 from rest_framework.permissions import IsAuthenticated
+
+#회원가입
+@api_view(["POST"])
+def signup(request):
+    serializer = SignupSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        return Response({f'Welcome!{request.data["username"]}'}, status=status.HTTP_201_CREATED)
 
 
 #프로필조회
@@ -17,12 +30,33 @@ def profile(request, username):
     account = get_object_or_404(User, username=username)
     serializer = ProfileSerializer(account)
     print(serializer.data)
-    return JsonResponse(serializer.data, status=200)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
-#회원가입
-@api_view(["POST"])
-def signup(request):
-    serializer = SignupSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
+
+#선택구현 
+#본인정보수정
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def update(request):
+    if request.method == "POST":   
+        serializer = UserChangeSerializer(request.data, instance=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            serializer = UserChangeSerializer(instance=request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+#비밀번호변경
+@api_view(["POST"])    
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    serializer = PasswordChangeSerializer(data=request.data, context={'request':request})
+    if serializer.is_valid():
         serializer.save()
-        return Response({f'Welcome!{request.data["username"]}'}, status=status.HTTP_201_CREATED)
+        return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTPT_200_OK)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
