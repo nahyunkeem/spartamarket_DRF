@@ -65,7 +65,7 @@ def update(request, username):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-#비밀번호변경
+#패스워드변경
 @api_view(["PUT"])    
 @permission_classes([IsAuthenticated])
 def change_password(request):
@@ -76,4 +76,6 @@ def change_password(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+#회원탈퇴
+@api_view(["DELETE"])    
+@permission_classes([IsAuthenticated])
