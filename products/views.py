@@ -1,45 +1,34 @@
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
-from rest_framework import serializers
-from rest_framework.decorators import api_view
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from .models import Product
-from rest_framework.pagination import PageNumberPagination
 from .serializers import ProductSerializer
+from rest_framework.pagination import PageNumberPagination
+
 
 class ProductPagination(PageNumberPagination):
-    page_size = 25
+    page_size = 10
 
-class ProductListView(generics.ListAPIView):
-    product = Product.objects.all()
+class ProductListView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     pagination_class = ProductPagination
-
-#상품목록조회 및 등록
-@api_view(["GET", "POST"])
-def product_list(request):
-    if request.method == "GET":
-        view = ProductListView.as_view()
-        return view(request)
     
-    elif request.method == "POST":
-        #실제로 데이터가 들어가있는 Serializer 생성
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
+    @permission_classes([IsAuthenticated])
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user) 
+            
+            
 #상품수정 및 삭제
 @api_view(["GET", "PUT", "DELETE"])
 def product_detail(request, pk):
     
     product = get_object_or_404(Product, pk=pk)
-    
-    if product.owner != request.users:
+    print(product.owner, request.user)
+    if product.owner != request.user:
         return Response({'error':'permisson denied'}, status=status.HTTP_403_FORBIDDEN)
     
     if request.method == "GET":

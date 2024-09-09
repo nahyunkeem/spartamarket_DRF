@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import get_user_model
+from .models import User
 from  django.contrib.auth.password_validation import validate_password
 
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ("username", "email", "name", "nickname", "birthday", "gender", "introduce", "password")
 
 
@@ -19,24 +19,28 @@ class SignupSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.ModelSerializer): 
     class Meta:
-        model = get_user_model()
-        
+        model = User
         fields = ("username", "password")
         
     
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ("username", "email", "name", "nickname", "birthday")
         
 
 class UserChangeSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    
     class Meta:
-        model = get_user_model()
+        model = User
         fields = [
+            
+            "username",
             "name",
             "email",
             "nickname",
+
         ]
         
 class PasswordChangeSerializer(serializers.ModelSerializer):
@@ -44,7 +48,7 @@ class PasswordChangeSerializer(serializers.ModelSerializer):
     new_password = serializers.CharField(required=True, write_only=True)
     
     class Meta:
-        model = get_user_model()
+        model = User
         fields = [
             "old_password", "new_password"
         ]
@@ -55,7 +59,7 @@ class PasswordChangeSerializer(serializers.ModelSerializer):
         return value
 
     def validate_new_password(self, value):
-        password_validation.validate_password(value, self.context['request'].user)
+        validate_password(value, self.context['request'].user)
         return value
 
     def save(self, **kwargs):

@@ -38,9 +38,9 @@ def profile(request, username):
 #로그아웃
 @api_view(["POST"])    
 @permission_classes([IsAuthenticated])
-def logout(requset):
+def logout(request):
     try:
-        refresh_token = request.data["refresh_token"]
+        refresh_token = request.data["refresh"]
         token = RefreshToken(refresh_token)
         token.blacklist()
 
@@ -50,27 +50,29 @@ def logout(requset):
 
 
 #본인정보수정
-@api_view(["GET", "POST"])
+@api_view(["GET", "PUT"])
 @permission_classes([IsAuthenticated])
-def update(request):
-    if request.method == "POST":   
-        serializer = UserChangeSerializer(request.data, instance=request.data)
+def update(request, username):
+    target_user = get_object_or_404(User, username=username)
+    
+    if request.method == "PUT":   
+        serializer = UserChangeSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            serializer = UserChangeSerializer(instance=request.user)
+    else:
+        serializer = UserChangeSerializer(target_user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 #비밀번호변경
-@api_view(["POST"])    
+@api_view(["PUT"])    
 @permission_classes([IsAuthenticated])
 def change_password(request):
     serializer = PasswordChangeSerializer(data=request.data, context={'request':request})
     if serializer.is_valid():
         serializer.save()
-        return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTPT_200_OK)
+        return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
