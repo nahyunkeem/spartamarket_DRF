@@ -5,6 +5,7 @@ from rest_framework.decorators import (
     )
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import password_validation
@@ -33,7 +34,21 @@ def profile(request, username):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-#선택구현 
+#선택구현
+#로그아웃
+@api_view(["POST"])    
+@permission_classes([IsAuthenticated])
+def logout(requset):
+    try:
+        refresh_token = request.data["refresh_token"]
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+
+        return Response({"message": "로그아웃되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
+    except Exception as e:
+        return Response({"error": "error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 #본인정보수정
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])

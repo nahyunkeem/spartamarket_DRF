@@ -22,9 +22,8 @@ class ProductListView(generics.ListAPIView):
 @api_view(["GET", "POST"])
 def product_list(request):
     if request.method == "GET":
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
+        view = ProductListView.as_view()
+        return view(request)
     
     elif request.method == "POST":
         #실제로 데이터가 들어가있는 Serializer 생성
