@@ -1,7 +1,7 @@
 # spartamarket_DRF
 
 #ERD
--![ERD](static/ERD.png)
+![ERD](static/ERD.png)
 
 # 프로젝트 소개
 스파르타 마켓을 DRF로 구현
@@ -12,14 +12,14 @@
 
 accounts
 - 회원가입
-
+!
 - 로그인
 
 - 프로필 조회
 - 로그아웃
 - 본인 정보 수정
 - 패스워드 변경
-- ![ERD](static/password updata.png)
+! (static/password update.png)
 
 
 products
