@@ -7,22 +7,32 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import password_validation
 from .models import User  
 from .serializers import (
     SignupSerializer, ProfileSerializer, UserChangeSerializer, PasswordChangeSerializer
 )
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.hashers import check_password
 
 #회원가입
-@api_view(["POST"])
+@api_view(["POST", "DELETE"])
 def signup(request):
-    serializer = SignupSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        serializer.save()
+    if request.method == "POST": 
+        serializer = SignupSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
         return Response({f'Welcome!{request.data["username"]}'}, status=status.HTTP_201_CREATED)
-
+    
+    elif request.method == "DELETE":
+        if not request.user.is_authenticated:
+            return Response({"detail":"자격 인증데이터(authentication credentials)가 제공되지 않았습니다."}, status=status.HTTP_401_UNAUTHORIZED)
+        user = request.user
+        if check_password(request.data['password'],user.password):
+            user.delete()
+            return Response({"message":"탈퇴가 성공적으로 완료됐습니다."}, status=status.HTTP_200_OK)   
+        else:
+            return Response({"detail":"패스워드가 잘못 입력 되었습니다."}, status=status.HTTP_401_UNAUTHORIZED)        
 
 #프로필조회
 @api_view(["GET"])
@@ -76,6 +86,3 @@ def change_password(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#회원탈퇴
-@api_view(["DELETE"])    
-@permission_classes([IsAuthenticated])

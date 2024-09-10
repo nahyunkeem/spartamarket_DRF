@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
 
-    #회원가입
+    #회원가입, 회원탈퇴
     path("",views.signup),
     #로그아웃(선택구현)
     path("logout/", views.logout),
@@ -20,7 +20,7 @@ urlpatterns = [
     #프로필 조회, 본인 정보 수정(선택구현)
     path("profile/<str:username>/", views.update),
     #회원탈퇴
-    path("delete/", views.delete)
+    
     
 ]
 
