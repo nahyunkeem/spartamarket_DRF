@@ -24,8 +24,8 @@ accounts
 - 패스워드 변경
 ![ERD](static/passwordU.png)
 -회원 탈퇴
-![ERD] (static/delete.png)
-![ERD] (static/delete2.png)
+![ERD](static/delete.png)
+![ERD](static/delete2.png)
 products
 - 상품 등록
 ![ERD](static/proC.png)
