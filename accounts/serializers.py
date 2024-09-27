@@ -11,18 +11,12 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
-        user = super().create(validated_data)
+        user = User.objects.create(**validated_data)
         user.set_password(validated_data['password'])
         user.save()
         return user
 
 
-class LoginSerializer(serializers.ModelSerializer): 
-    class Meta:
-        model = User
-        fields = ("username", "password")
-        
-    
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -67,4 +61,3 @@ class PasswordChangeSerializer(serializers.ModelSerializer):
         user.set_password(self.validated_data['new_password'])
         user.save()
         return user
-    

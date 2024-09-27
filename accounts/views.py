@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
 from rest_framework.decorators import (
     api_view, permission_classes
     )
@@ -7,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
-from django.contrib.auth import password_validation
 from .models import User  
 from .serializers import (
     SignupSerializer, ProfileSerializer, UserChangeSerializer, PasswordChangeSerializer
@@ -15,7 +12,7 @@ from .serializers import (
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.hashers import check_password
 
-#회원가입
+#회원가입, 탈퇴
 @api_view(["POST", "DELETE"])
 def signup(request):
     if request.method == "POST": 
@@ -55,8 +52,14 @@ def logout(request):
         token.blacklist()
 
         return Response({"message": "로그아웃되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
+    except Exception.TokenError:
+        return Response({"error": "TokenError"}, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception.KeyError:
+        return Response({"error": "KeyError"}, status=status.HTTP_400_BAD_REQUEST)
+
     except Exception as e:
-        return Response({"error": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error":e}, status=status.HTTP_400_BAD_REQUEST)
 
 
 #본인정보수정

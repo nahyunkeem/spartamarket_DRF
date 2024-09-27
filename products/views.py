@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
@@ -17,7 +17,7 @@ class ProductListView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     pagination_class = ProductPagination
     
-    @permission_classes([IsAuthenticated])
+    permission_classes = [IsAuthenticatedOrReadOnly]
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user) 
             
@@ -28,6 +28,7 @@ def product_detail(request, pk):
     
     product = get_object_or_404(Product, pk=pk)
     print(product.owner, request.user)
+    
     if product.owner != request.user:
         return Response({'error':'permisson denied'}, status=status.HTTP_403_FORBIDDEN)
     
